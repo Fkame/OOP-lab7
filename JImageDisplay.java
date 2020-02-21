@@ -41,6 +41,26 @@ public class JImageDisplay extends JPanel {
 	}
 	
 	/*
+	* Закрашивание символа без полной перерисовки
+	*/
+	public void drawPixelWithoutFullRepaint(long tm, int x, int y, int width, int height, Color color) {
+		// Установка необходимого цвета
+		g.setColor(color);
+		
+		// Закрашиване необходимого пикселя
+		g.fillRect(x, y, 1, 1);
+		
+		this.repaint(tm, x, y, width, height);
+	}
+	
+	/*
+	* Принудительная перерисовка
+	*/
+	public void repaintPicture() {
+		this.repaint();
+	}
+	
+	/*
 	* Непосредственно рисование
 	*/
 	public void drawPixel(int x, int y, Color color) {
@@ -88,5 +108,13 @@ public class JImageDisplay extends JPanel {
 	
 	public BufferedImage getImage() {
 		return bImg;
+	}
+	
+	public int getHeight() {
+		return this.height;
+	}
+	
+	public int getWidth() {
+		return this.width;
 	}
 }

@@ -2,7 +2,7 @@ import java.awt.geom.Rectangle2D;
 
 public class Tricorn extends FractalGenerator {
 	
-	public static final int MAX_ITERATIONS = 1000;
+	public static final int MAX_ITERATIONS = 2000;
 	
 	public Tricorn() {
 		

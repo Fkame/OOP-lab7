@@ -282,12 +282,24 @@ public class FractalExplorer {
 	* В цикле идёт проход по всем пикселям и определяется, входит ли он в площадь фрактала
 	* Степень входа определяется цветом пикселя.
 	*/
-	
 	public void drawFractal(int index) {
 		
 		// Очистка картинки после предыдущего рисунка
 		this.clearImage();
 		
+		// Запуск потоков на выполнение отрисовки
+		int pictureHeight = display.getHeight();
+		int pictureWidth = display.getWidth();
+		
+		for (int i = 0; i < pictureHeight; i++) {
+			// Создание потока и запуск его выполнения
+			// На вход потоку идёт номер строки, длина строки, индекс фрактала в списке, по которому проводить вычисления
+			FractalWorker tempThread = new FractalWorker(i, pictureWidth, index);
+			tempThread.execute();
+		}
+		
+		
+		/*
 		for (int x = 0; x < this.width; x++) {
 			for (int y = 0; y < this.height; y++) {
 				
@@ -311,6 +323,7 @@ public class FractalExplorer {
 				
 			}
 		}
+		*/
 	}
 	
 	/*
@@ -322,6 +335,73 @@ public class FractalExplorer {
 	
 	public void clearImage() {
 		this.display.clearImage();
+	}
+	
+	/*
+	* Многопоточность
+	*/
+	private class FractalWorker extends SwingWorker<Object, Object> {
+		
+		// Номер строки, которую будет проверять поток
+		private int numOfStr;
+		private int picWidth;
+		
+		// Массив вычисленных значений этой строки
+		private int[] strValues;
+		
+		// С каким фракталом работать
+		private int index;
+		
+		// Конструктор: номер строки, ширина строки, индекс фрактала из списка
+		public FractalWorker(int y, int picWidth, int index) {
+			this.numOfStr = y;
+			this.picWidth = picWidth;
+			this.index = index;
+		}
+		
+		// Выполняется в фоновом потоке (не должен взаимодействовать с GUI)
+		@Override
+        protected String doInBackground() throws Exception {
+			
+			strValues = new int[picWidth];
+			
+			for (int x = 0; x < picWidth; x++) {
+				// Преобразование координат плоскости пикселей в координаты мнимой плоскости
+				double xCoord = FractalGenerator.getCoord(range.x, range.x + range.width, display.getWidth(), x);
+				double yCoord = FractalGenerator.getCoord(range.y, range.y + range.height, display.getHeight(), numOfStr);
+				
+				// Определение входа точки в множество фрактала
+				strValues[x] = fractals.get(index).numIterations(xCoord, yCoord);
+			}
+			
+			return null;
+		}
+		
+		// Вызывается при завершении работы фонового потока
+		@Override
+        protected void done() {
+			try {
+				int x = 0;
+				for (int numOfIter: strValues) {
+					int rgbColor;
+					if (numOfIter != -1) {
+						float hue = 0.7f + (float) numOfIter / 200f; 
+						rgbColor = Color.HSBtoRGB(hue, 1f, 1f); 
+					} 
+					else {
+						rgbColor = Color.HSBtoRGB(0, 0, 0); 
+					}
+					
+					// Вроде как это неполная перерисовка
+					//display.drawPixel(x, numOfStr, new Color(rgbColor));
+					display.drawPixelWithoutFullRepaint(0, x, numOfStr, 1, 1, new Color(rgbColor));
+					x++;
+				}
+			} 
+			catch (Exception e) { 
+				e.printStackTrace(); 
+            }  
+		} 
 	}
 	
 	/*
