@@ -37,6 +37,9 @@ public class FractalExplorer {
 	// Текущая директория
 	private File nowPath = null;
 	
+	// Количество потоков на выполнении
+	private int rowsRemaining = 0;
+	
 	/*
 	* Классы-слушатели событий кнопки сброса и сохранения, и мыши
 	*/
@@ -120,6 +123,9 @@ public class FractalExplorer {
 		// Событие нажатия на кнопку мыщи
 		public void mouseClicked(MouseEvent e) {
 			System.out.println("Mouse button clicked!");
+			
+			// Если потоки отрисовки выполняется - событие не обрабатывается
+			if (rowsRemaining != 0) return;
 			
 			int index = chooseF.getSelectedIndex();
 			if (index >= fractals.size()) return;
@@ -287,9 +293,14 @@ public class FractalExplorer {
 		// Очистка картинки после предыдущего рисунка
 		this.clearImage();
 		
+		// Отключение GUI на время выполнения потоков
+		this.enableUI(false);
+		
 		// Запуск потоков на выполнение отрисовки
 		int pictureHeight = display.getHeight();
 		int pictureWidth = display.getWidth();
+		
+		rowsRemaining = pictureHeight;
 		
 		for (int i = 0; i < pictureHeight; i++) {
 			// Создание потока и запуск его выполнения
@@ -400,8 +411,20 @@ public class FractalExplorer {
 			} 
 			catch (Exception e) { 
 				e.printStackTrace(); 
-            }  
+            }
+			
+			rowsRemaining--;
+			if (rowsRemaining == 0) enableUI(true);
 		} 
+	}
+	
+	/*
+	* Управление доступностью GUI
+	*/
+	private void enableUI(boolean enable) {
+		chooseF.setEnabled(enable);
+		saveB.setEnabled(enable);
+		resetB.setEnabled(enable);
 	}
 	
 	/*
