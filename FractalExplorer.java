@@ -403,18 +403,31 @@ public class FractalExplorer {
 						rgbColor = Color.HSBtoRGB(0, 0, 0); 
 					}
 					
-					// Вроде как это неполная перерисовка
+					// 1!После каждого вызова идёт полная перерисовка
 					//display.drawPixel(x, numOfStr, new Color(rgbColor));
-					display.drawPixelWithoutFullRepaint(0, x, numOfStr, 1, 1, new Color(rgbColor));
+					
+					// 2!Вроде как это неполная перерисовка
+					//display.drawPixelWithoutFullRepaint(0, x, numOfStr, 1, 1, new Color(rgbColor));
+					
+					// 3!Перерисовка без обновления элемента - рисуется на buffered image без присвоение результата jpanel
+					display.drawPixelWithNoRepaint(x, numOfStr, new Color(rgbColor));
+					
 					x++;
 				}
+				// 3!Обновление рисунка при перерисовке без обновления элемента
+				//display.repaintPicture(0, numOfStr, picWidth);
 			} 
 			catch (Exception e) { 
 				e.printStackTrace(); 
             }
 			
 			rowsRemaining--;
-			if (rowsRemaining == 0) enableUI(true);
+			if (rowsRemaining == 0) {
+				enableUI(true);
+				
+				// 3.1!Обновленеи рисунка при завершении всех потоков (картинка отрисуется на элемент когда вся отрисовка будет готова)
+				display.repaintPicture();
+			}
 		} 
 	}
 	

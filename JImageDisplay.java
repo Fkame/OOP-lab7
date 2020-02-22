@@ -53,11 +53,23 @@ public class JImageDisplay extends JPanel {
 		this.repaint(tm, x, y, width, height);
 	}
 	
+	public void drawPixelWithNoRepaint(int x, int y, Color color) {
+		// Установка необходимого цвета
+		g.setColor(color);
+		
+		// Закрашиване необходимого пикселя
+		g.fillRect(x, y, 1, 1);
+	}
+	
 	/*
 	* Принудительная перерисовка
 	*/
 	public void repaintPicture() {
 		this.repaint();
+	}
+	
+	public void repaintPicture(int x, int y, int width) {
+		this.repaint(0, x, y, width, 1);
 	}
 	
 	/*
